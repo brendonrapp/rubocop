@@ -266,9 +266,13 @@ module RuboCop
     end
 
     def gem_config_path(gem_name, relative_config_path)
-      if defined?(Bundler)
-        gem = Bundler.load.specs[gem_name].first
-        gem_path = gem.full_gem_path if gem
+      begin
+        if defined?(Bundler)
+          gem = Bundler.load.specs[gem_name].first
+          gem_path = gem.full_gem_path if gem
+        end
+      rescue Bundler::GemNotFound
+        nil # prevent Bundler failure from blocking non-Bundler gem path lookup
       end
 
       gem_path ||= Gem::Specification.find_by_name(gem_name).gem_dir
